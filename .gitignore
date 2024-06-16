@@ -1,0 +1,48 @@
+# Игнорировать файлы байт-кода Python
+__pycache__/
+*.pyc
+
+# Игнорировать файлы настроек IDE
+.vscode/
+.idea/
+
+# Игнорировать файлы окружения и зависимостей
+venv/
+env/
+*.env
+*.log
+
+# Игнорировать файлы сборки и временные файлы
+build/
+dist/
+*.egg-info/
+*.egg
+*.egg-info
+*.egg-info/
+*.dist-info/
+*.dist-info
+*.dist-info/
+*.log
+*.tmp
+*.tmp/
+*.swp
+*.swo
+*.swn
+*.bak
+*.pyc
+*.pyo
+*.pyd
+*.cache
+*.DS_Store
+
+# Игнорировать файлы конфигурации
+config.ini
+config.yml
+config.json
+
+# Игнорировать файлы локализации
+*.mo
+*.pot
+
+# Игнорировать файлы логов
+*.log
