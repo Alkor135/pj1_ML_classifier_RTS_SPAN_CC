@@ -44,6 +44,7 @@ def get_options_date_results(tradedate: date, shortname: str):
     arguments = {'securities.columns': (
         "BOARDID, TRADEDATE, SECID, OPEN, LOW, HIGH, CLOSE, OPENPOSITIONVALUE, VALUE, VOLUME, OPENPOSITION, SETTLEPRICE"
     )}
+    # arguments = {'securities.columns': ("TRADEDATE, SECID, OPENPOSITION")}
 
     with requests.Session() as session:
         page = 0  # С какой записи стартовать запрос
@@ -58,17 +59,27 @@ def get_options_date_results(tradedate: date, shortname: str):
             if len(df) == 0:  # Больше нет страниц в ответе
                 break
             else:
+                df = df[["TRADEDATE", "SECID", "OPENPOSITION"]]  # Оставляем нужные поля
+                # df = df.drop(columns=['BOARDID', 'SETTLEPRICEDAY', 'WAPRICE'])  # Удаляем не нужные поля
                 # Создаем новые колонки 'NAME', 'LSTTRADE', 'OPTIONTYPE', 'STRIKE' и заполняем
                 df[['NAME', 'LSTTRADE', 'OPTIONTYPE', 'STRIKE']] = df.apply(
                     lambda x: get_info_security(session, x['SECID']), axis=1)
                 # print(df.to_string(max_rows=20, max_cols=15), '\n')
-                df["LSTTRADE"] = pd.to_datetime(df["LSTTRADE"])  # Меняем формат колонки на дату
-                # Оставляем только строки где дата экспирации больше даты бара (исключаем ОИ=0)
+                # Меняем формат колонки на дату
+                df["LSTTRADE"] = pd.to_datetime(df["LSTTRADE"])
+                # # Преобразуем указанные колонки в тип "дата"
+                # df[["LSTTRADE", "TRADEDATE"]] = df[["LSTTRADE", "TRADEDATE"]].apply(pd.to_datetime)
+                # Оставляем только строки, где дата экспирации опциона больше даты бара фьючерса(исключаем ОИ=0)
                 df = df.loc[df['LSTTRADE'] > tradedate]
+                # # Оставляем только строки, где дата экспирации опциона больше даты бара фьючерса и опц. (исключаем ОИ=0)
+                # df = df.loc[(df['LSTTRADE'] > tradedate) & (df['LSTTRADE'] > df['TRADEDATE'])]
                 df = df.loc[df['NAME'] == shortname]  # Выбор опционов текущего базового актива
+                # Заполняем пропущенные значения в столбце OPENPOSITION значением 0.0
+                df['OPENPOSITION'] = df['OPENPOSITION'].fillna(0.0)
                 # df = df[df['LSTTRADE'] == df['LSTTRADE'].min()]  # Выборка строк с минимальной датой
-                df_rez = pd.concat([df_rez, df]).reset_index(drop=True)  # Слияние DF
-                print(df_rez.to_string(max_rows=20, max_cols=20), '\n')
+                # df_rez = pd.concat([df_rez, df]).reset_index(drop=True)  # Слияние DF
+                df_rez = pd.concat([df_rez.dropna(), df.dropna()]).reset_index(drop=True)
+                print(df_rez.to_string(max_rows=6, max_cols=18), '\n')
                 page += 100  # для запроса следующей страницы со 100 записями
 
     return df_rez
@@ -84,10 +95,7 @@ def add_row_options_table(connection, cursor, df):
     # # Вызываем функцию sys.exit() для остановки выполнения кода
     # sys.exit()
     for row in df.itertuples():  # Перебираем опционы для занесения в БД
-        # row14 = row[14].date().strftime("%Y-%m-%d")
-        # row11 = int(row[11])
         # print(f'{row.TRADEDATE}, {row.SECID}, {int(row.OPENPOSITION)}, {row.NAME}, {row.LSTTRADE.date()}, {row.OPTIONTYPE}, {row.STRIKE}')
-        # sqlighter3_RTS_day.add_tradedate_option(connection, cursor, row[2], row[3], row11, row[13], row14, row[15], row[16])
         sqlighter3_RTS_day.add_tradedate_option(
             connection,
             cursor,
@@ -107,7 +115,7 @@ if __name__ == '__main__':  # Точка входа при запуске это
     tiker: str = 'RTS'
     path_db: Path = Path(fr'c:\Users\Alkor\gd\data_quote_db\{tiker}_futures_options_day_pj1.db')
     # Лучше брать последнюю дату в БД таблицы Options
-    start_date: date = datetime.strptime('2015-01-01', "%Y-%m-%d").date()
+    start_date: date = datetime.strptime('2023-01-01', "%Y-%m-%d").date()
 
     connection: Any = sqlite3.connect(path_db, check_same_thread=True)
     cursor: Any = connection.cursor()
@@ -120,7 +128,7 @@ if __name__ == '__main__':  # Точка входа при запуске это
 
     df = pd.DataFrame()
     for row in df_tradedate.itertuples():  # Перебираем даты для запроса торгуемых опционов на эту дату
-        print(f'Индекс={row.Index}, TRADEDATE={row.TRADEDATE}, SHORTNAME={row.SHORTNAME}')
+        print(f'\nИндекс={row.Index}, TRADEDATE={row.TRADEDATE}, SHORTNAME={row.SHORTNAME}')
         if not sqlighter3_RTS_day.tradedate_options_exists(connection, cursor, row.TRADEDATE):  # Нет записи с такой датой
             df = get_options_date_results(row.TRADEDATE, row.SHORTNAME)  # Получаем DF по опционам от МОЕХ
             # print(df.to_string(max_rows=10, max_cols=20), '\n')
