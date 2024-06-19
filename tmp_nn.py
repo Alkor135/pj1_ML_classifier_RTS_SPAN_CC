@@ -12,9 +12,9 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 from sklearn.datasets import load_iris
 
-# Отключение oneDNN
-import os
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+# # Отключение oneDNN
+# import os
+# os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 # Загрузка данных
 data = load_iris()
