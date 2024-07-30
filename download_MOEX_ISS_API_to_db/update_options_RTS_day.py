@@ -107,6 +107,7 @@ def add_row_options_table(connection, cursor, df):
             row.OPTIONTYPE,
             row.STRIKE
         )
+    print('Опционы за дату записаны в БД.')
         # # Вызываем функцию sys.exit() для остановки выполнения кода
         # sys.exit()
 
@@ -115,7 +116,7 @@ if __name__ == '__main__':  # Точка входа при запуске это
     tiker: str = 'RTS'
     path_db: Path = Path(fr'c:\Users\Alkor\gd\data_quote_db\{tiker}_futures_options_day_pj1.db')
     # Лучше брать последнюю дату в БД таблицы Options
-    start_date: date = datetime.strptime('2023-01-01', "%Y-%m-%d").date()
+    start_date: date = datetime.strptime('2024-07-01', "%Y-%m-%d").date()
 
     connection: Any = sqlite3.connect(path_db, check_same_thread=True)
     cursor: Any = connection.cursor()
