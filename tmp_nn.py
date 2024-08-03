@@ -1,4 +1,5 @@
 # Отключение oneDNN
+import sys
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
@@ -20,6 +21,10 @@ from sklearn.datasets import load_iris
 data = load_iris()
 X = data.data
 y = data.target
+# print(f'data {data}')
+# print(f'data.data {data.data}')
+# print(f'{data.target=}')
+# sys.exit()
 
 # Преобразование меток в one-hot encoding
 y = to_categorical(y)
@@ -31,6 +36,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
+
+print(X_train)
+print(y_train)
+sys.exit()
 
 model = Sequential([
     # Input(shape=(X_train.shape[1],)),
@@ -46,7 +55,7 @@ model.compile(optimizer=Adam(learning_rate=0.001),
 history = model.fit(X_train, y_train, epochs=50, batch_size=8, validation_split=0.2)
 
 loss, accuracy = model.evaluate(X_test, y_test)
-print(f'Test Accuracy: {accuracy:.4f}')
+# print(f'Test Accuracy: {accuracy:.4f}')
 
 predictions = model.predict(X_test)
 
@@ -56,5 +65,5 @@ np.set_printoptions(suppress=True, precision=4)
 # print("Formatted Predictions:\n", predictions)
 
 # Пример вывода вероятностей для первого примера из тестовой выборки
-print(predictions[0])
-print(predictions)
+# print(predictions[0])
+# print(predictions)

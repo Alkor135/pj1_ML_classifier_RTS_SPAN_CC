@@ -94,7 +94,7 @@ def get_future_date_results(tradedate: date, tiker: str):
 if __name__ == '__main__':  # Точка входа при запуске этого скрипта
     tiker: str = 'RTS'
     path_db: Path = Path(fr'c:\Users\Alkor\gd\data_quote_db\{tiker}_futures_options_day_pj1.db')
-    start_date: date = datetime.strptime('2015-01-01', "%Y-%m-%d").date()
+    start_date: date = datetime.strptime('2024-01-01', "%Y-%m-%d").date()
 
     connection: Any = sqlite3.connect(path_db, check_same_thread=True)
     cursor: Any = connection.cursor()
